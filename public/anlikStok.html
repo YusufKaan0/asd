@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anlık Stok - Stok Takip Sistemi</title>
+    <!-- Faviocon -->
+    <link rel="icon" href="/favicon-32x32.png" type="image/png">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" >
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.3/sweetalert2.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            margin-top: 50px;
+        }
+
+        .card {
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            background-color: #007bff;
+            color: white;
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-header .btn-link {
+            color: #ffffff;
+            margin-left: 10px;
+            font-size: 1.2rem;
+            /* Adjust size if needed */
+        }
+
+        .card-header .btn-link:hover {
+            color: #cccccc;
+            /* Adjust hover color if needed */
+        }
+
+        .card-body {
+            background-color: #ffffff;
+        }
+
+        .form-group input,
+        .form-group button {
+            height: 50px;
+        }
+
+        .navbar {
+            background-color: blue;
+            padding: 0.5rem 1rem;
+            height: 100px;
+            line-height: 100px;
+        }
+
+        .navbar-nav {
+            flex: 1;
+            justify-content: center;
+        }
+
+        .navbar-brand,
+        .nav-link {
+            color: #ffffff !important;
+        }
+
+        .nav-link {
+            transition: color 0.2s ease-in-out;
+        }
+
+        .nav-link:hover {
+            color: #000000 !important;
+        }
+
+        .table tbody tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .table th,
+        .table td {
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/anaSayfa.html">Ana Sayfa</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/anlikStok.html">Anlık Stok</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/urunGirisi.html">Ürün Girişi</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/urunCikisi.html">Ürün Çıkışı</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/urunBilgiGiris.html">Stok Kartı</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1 class="text-center mb-4">Anlık Stok Görüntüleme ve Sorgulama İşlemleri</h1>
+        <div class="card">
+            <div class="card-header">
+                <span>Anlık Stok - Ürün Bilgilerine Göre Sorgulama İşlemleri</span>
+                <div>
+                    <button id="listButton" type="button" class="btn btn-link p-0" onclick="loadItems()"
+                        title="Listele">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <form id="itemForm">
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <input type="text" id="barcode" class="form-control" placeholder="Barkod No">
+                        </div>
+                        <div class="form-group col-md-4">
+                            <input type="text" id="quantity" class="form-control" placeholder="Ürün Adı">
+                        </div>
+                        <div class="form-group col-md-4">
+                            <input type="text" id="purchasePrice" class="form-control" placeholder="Parti Kodu">
+                        </div>
+                        <div class="form-group col-md-12">
+                            <button type="button" id="searchButton" class="btn btn-primary btn-block">Sorgula</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                Anlık Stok Ürün Listesi
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Barkod No</th>
+                            <th>Ürün Adı</th>
+                            <th>Parti Kodu</th>
+                            <th>Renk Kodu</th>
+                            <th>Giren Miktar</th>
+                            <th>Çıkan Miktar</th>
+                            <th>Mevcut Miktar</th>
+                        </tr>
+                    </thead>
+                    <tbody id="items">
+                        <!-- Ürün listesi burada görüntülenecek -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Bootstrap JS, Popper.js, and jQuery -->
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.3/sweetalert2.min.js"></script>
+
+        <script>
+            function toUpperCaseTurkish(str) {
+                // Normalizasyon yaparak karakterleri uygun şekilde işleyin
+                const normalizedStr = str.normalize('NFD');
+
+                // Türkçe karakterler için özel dönüşüm
+                const turkishUpperCaseMap = {
+                    'ı': 'I', 'i': 'İ', 'ç': 'Ç', 'ş': 'Ş', 'ğ': 'Ğ', 'ö': 'Ö', 'ü': 'Ü'
+                };
+
+                let result = '';
+
+                for (const char of normalizedStr) {
+                    if (turkishUpperCaseMap[char]) {
+                        result += turkishUpperCaseMap[char];
+                    } else {
+                        result += char.toUpperCase();
+                    }
+                }
+
+                return result.normalize('NFC');
+            }
+
+            document.getElementById('quantity').addEventListener('input', (event) => {
+                event.target.value = toUpperCaseTurkish(event.target.value);
+            });
+
+            document.getElementById('purchasePrice').addEventListener('input', (event) => {
+                event.target.value = toUpperCaseTurkish(event.target.value);
+            });
+
+
+
+            function loadItems() {
+                fetch('/api/anlik')
+                    .then(response => response.json())
+                    .then(data => {
+                        const itemsContainer = document.getElementById('items');
+                        itemsContainer.innerHTML = '';
+                        data.forEach(urun => {
+                            const row = document.createElement('tr');
+                            const barkodnoCell = document.createElement('td');
+                            const ürünadıCell = document.createElement('td');
+                            const birimiCell = document.createElement('td');
+                            const girenMiktarCell = document.createElement('td');
+                            const cikanMiktarCell = document.createElement('td');
+                            const mevcutMiktarCell = document.createElement('td');
+
+                            barkodnoCell.textContent = urun.barkodno || '0';
+                            ürünadıCell.textContent = urun.urunAdi || '0';
+                            birimiCell.textContent = urun.birimi || '0';
+                            girenMiktarCell.textContent = urun.girenMiktar || '0';
+                            cikanMiktarCell.textContent = urun.cikanMiktar || '0';
+                            mevcutMiktarCell.textContent = urun.mevcutMiktar || '0';
+
+                            row.appendChild(barkodnoCell);
+                            row.appendChild(ürünadıCell);
+                            row.appendChild(birimiCell);
+                            row.appendChild(girenMiktarCell);
+                            row.appendChild(cikanMiktarCell);
+                            row.appendChild(mevcutMiktarCell);
+                            itemsContainer.appendChild(row);
+                        });
+                    });
+            }
+
+            document.getElementById('searchButton').addEventListener('click', () => {
+                const barcode = document.getElementById('barcode').value.trim();
+                const urunAdi = document.getElementById('quantity').value.trim();
+                const birimi = document.getElementById('purchasePrice').value.trim();
+
+                if (!barcode && !urunAdi && !birimi) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Bilgi Eksik',
+                        text: 'En az bir alanı doldurmalısınız!',
+                    });
+                    return;
+                }
+
+                let queryParam = barcode ? `barcode=${barcode}` : urunAdi ? `urunAdi=${urunAdi}` : `birimi=${birimi}`;
+                console.log('Query Parameter:', queryParam);
+
+                fetch(`/api/anlik/sorgu?${queryParam}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const itemsContainer = document.getElementById('items');
+                        itemsContainer.innerHTML = '';
+
+                        if (data.length > 0) {
+                            data.forEach(urun => {
+                                const row = document.createElement('tr');
+                                const barkodnoCell = document.createElement('td');
+                                const ürünadıCell = document.createElement('td');
+                                const birimiCell = document.createElement('td');
+                                const girenMiktarCell = document.createElement('td');
+                                const cikanMiktarCell = document.createElement('td');
+                                const mevcutMiktarCell = document.createElement('td');
+
+                                barkodnoCell.textContent = urun.barkodno || '0';
+                                ürünadıCell.textContent = urun.urunAdi || '0';
+                                birimiCell.textContent = urun.birimi || '0';
+                                girenMiktarCell.textContent = urun.girenMiktar || '0';
+                                cikanMiktarCell.textContent = urun.cikanMiktar || '0';
+                                mevcutMiktarCell.textContent = urun.mevcutMiktar || '0';
+
+                                row.appendChild(barkodnoCell);
+                                row.appendChild(ürünadıCell);
+                                row.appendChild(birimiCell);
+                                row.appendChild(girenMiktarCell);
+                                row.appendChild(cikanMiktarCell);
+                                row.appendChild(mevcutMiktarCell);
+                                itemsContainer.appendChild(row);
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'info',
+                                title: 'Ürün Bulunamadı',
+                                text: 'Girilen bilgiye ait ürün bulunamadı.',
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Hata',
+                            text: 'Bir hata oluştu, ürün bilgisi bulunamadı.',
+                        });
+                    });
+            });
+
+            document.getElementById('listButton').addEventListener('click', () => {
+                loadItems();
+                document.getElementById('barcode').value = '';
+                document.getElementById('quantity').value = '';
+                document.getElementById('purchasePrice').value = '';
+            });
+
+            // barkoda tıklanınca ürün adı ve birim alanlarını temizle
+            document.getElementById('barcode').addEventListener('click', () => {
+                document.getElementById('quantity').value = '';
+                document.getElementById('purchasePrice').value = '';
+            });
+
+            // ürün adına tıklanınca barkod ve birim alanlarını temizle
+            document.getElementById('quantity').addEventListener('click', () => {
+                document.getElementById('barcode').value = '';
+                document.getElementById('purchasePrice').value = '';
+            });
+
+            // birime tıklanınca barkod ve ürün adı alanlarını temizle
+            document.getElementById('purchasePrice').addEventListener('click', () => {
+                document.getElementById('barcode').value = '';
+                document.getElementById('quantity').value = '';
+            });
+
+            document.addEventListener('DOMContentLoaded', () => {
+                loadItems();
+            });
+        </script>
+</body>
+
+</html>
